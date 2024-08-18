@@ -65,6 +65,7 @@ fprintf('Accessing column: %s\n', column_name);
 % Extract the data based on the selected column
 time = data.Time;
 frequencyValues = data.(column_name);
+adjustedCorrFreq = data.Adjusted_Corr_Freq;  % The corresponding frequency to compare against
 brightness = data.Scaled_Amplitude;
 
 % Calculate the song length in seconds
@@ -82,6 +83,7 @@ frequencyInterpMethod = 'nearest';
 brightnessInterpMethod = 'linear';
 
 interpolatedFreqs = interp1(time, frequencyValues, sampleTimes, frequencyInterpMethod);
+interpolatedCorrFreqs = interp1(time, adjustedCorrFreq, sampleTimes, frequencyInterpMethod);
 interpolatedBrightness = round(interp1(time, brightness, sampleTimes, brightnessInterpMethod));
 
 % Generate strobe waveform
@@ -90,25 +92,11 @@ strobeDutyCycle = 50;
 strobe = (1 + square(sampleTimes * 2 * pi .* avgFreqSinceStart, strobeDutyCycle)) ./ 2;
 
 % Calculate intermodulation distortion components
-differenceTones = abs(interpolatedFreqs - interpolatedFreqs);
-summationTones = interpolatedFreqs + interpolatedFreqs;
+differenceTones = abs(interpolatedFreqs - interpolatedCorrFreqs);
+summationTones = interpolatedFreqs + interpolatedCorrFreqs;
 
-% Create LED ON/OFF bitmap
-ledONBitmap = binary8ToUint8(repmat(strobe, 1, 8));
-
-% Preallocate dacChannelValuesPerSample for efficiency
-dacChannelValuesPerSample = zeros(length(sampleTimes), 5);
-
-% Assign brightness values to DAC channels
-dacChannelValuesPerSample(:, 1) = interpolatedBrightness;
-dacChannelValuesPerSample(:, 2:5) = repmat(interpolatedBrightness, 1, 4);
-
-% Prepare strobe data
-preparedStrobeData2D = [ledONBitmap, dacChannelValuesPerSample];
-preparedStrobeData1D = reshape(preparedStrobeData2D', [size(preparedStrobeData2D, 1) * size(preparedStrobeData2D, 2), 1])';
-
-% Save the strobe data to a .mat file
-save([song_name, '.mat'], 'preparedStrobeData1D');
+% Clean up the interval and direction names for the title and legend
+clean_column_name = strrep(column_name, '_', ' ');
 
 % Plot the results
 figure;
@@ -116,16 +104,16 @@ tiledlayout(2,1)
 
 % Plot the selected frequency and IMD Components
 nexttile
-title(['Selected Audiovisual Interval (' column_name ') and IMD Components'])
+title(['Selected Audiovisual Interval (' clean_column_name ') and IMD Components'])
 yyaxis left
-plot(sampleTimes, interpolatedFreqs, 'b', 'DisplayName', column_name)
+plot(sampleTimes, interpolatedFreqs, 'b', 'DisplayName', clean_column_name)
 hold on
 plot(sampleTimes, differenceTones, 'g--', 'DisplayName', 'Difference Tone')
 plot(sampleTimes, summationTones, 'm--', 'DisplayName', 'Summation Tone')
 ylabel("Frequency (Hz)")
 xlabel("Time (seconds)")
 xlim([0, song_length])
-legend show
+legend('Location', 'best')
 hold on
 yyaxis right
 plot(sampleTimes, interpolatedBrightness, 'color', [1, 0.5, 0], 'DisplayName', 'Brightness')
@@ -142,7 +130,7 @@ yticks([0,1]);
 yticklabels(["Off", "On"])
 xlabel("Time (seconds)")
 xlim([0, song_length])
-legend show
+legend('Location', 'best')
 
 % Load and play the audio signal to signal the start of the sequence
 [yStart, FsStart] = audioread(audioFilePathStart);
