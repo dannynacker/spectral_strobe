@@ -38,13 +38,14 @@ intervals = {'Unison', 'Minor Second', 'Major Second', 'Minor Third', ...
              'Perfect Fifth', 'Minor Sixth', 'Major Sixth', ...
              'Minor Seventh', 'Major Seventh', 'Octave'};
 
-for i = 0:length(intervals)-1
-    fprintf('(%d) %s\n', i, intervals{i+1});
+% Adjust the loop to start from 1 instead of 0
+for i = 1:length(intervals)
+    fprintf('(%d) %s\n', i, intervals{i});
 end
-interval_choice = input('Choose interval (0-12): ');
+interval_choice = input('Choose interval (1-13): ');
 
 % Construct the column name based on the user input
-if interval_choice == 0
+if interval_choice == 1
     column_name = 'Adjusted_Corr_Freq';
     disp('Using Unison (Corresponding Frequencies).');
 else
@@ -77,6 +78,7 @@ disp(['Song length: ', num2str(song_length), ' seconds']);
 % Generate sample times
 frameDurationS = (1/2000); % Time duration of each frame
 sampleTimes = (0:frameDurationS:song_length-frameDurationS)'; % Generate a list of sample timestamps
+
 
 % Interpolate the data based on sample times
 frequencyInterpMethod = 'nearest'; 
