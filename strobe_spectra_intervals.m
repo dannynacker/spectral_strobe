@@ -20,7 +20,7 @@ audioFilePathStart = "D:\Strobe_Spectra\copper_bell_A.mp3";
 audioFilePathMain = "D:\Strobe_Spectra\jupiter.mp3";
 
 % Designate the path to your spectral CSV file
-data = readtable("D:\Strobe_Spectra\jupiter.csv";
+data = readtable("D:\Strobe_Spectra\jupiter.csv");
 
 % Designate the path to SCCS_strobe_load_device and StrobeDevice.m here for the success function
 % and for interfacing with the strobe device
@@ -49,15 +49,18 @@ if interval_choice == 0
     disp('Using Unison (Corresponding Frequencies).');
 else
     if direction_choice == 1
-        column_name = sprintf('%s Up_Freq', intervals{interval_choice});
+        column_name = sprintf('%s_Up_Freq', strrep(intervals{interval_choice}, ' ', ''));
         disp(['Using ', intervals{interval_choice}, ' Up.']);
     elseif direction_choice == 2
-        column_name = sprintf('%s Down_Freq', intervals{interval_choice});
+        column_name = sprintf('%s_Down_Freq', strrep(intervals{interval_choice}, ' ', ''));
         disp(['Using ', intervals{interval_choice}, ' Down.']);
     else
         error('Invalid direction choice! Please choose 1 or 2.');
     end
 end
+
+% Ensure the constructed column name is correct
+fprintf('Accessing column: %s\n', column_name);
 
 % Extract the data based on the selected column
 time = data.Time;
