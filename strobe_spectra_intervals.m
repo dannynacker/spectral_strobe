@@ -98,7 +98,21 @@ differenceTones = abs(interpolatedFreqs - interpolatedCorrFreqs);
 summationTones = interpolatedFreqs + interpolatedCorrFreqs;
 
 % Clean up the interval and direction names for the title and legend
-clean_column_name = strrep(column_name, '_', ' ');
+intervalNameParts = strsplit(column_name, '_');
+intervalName = intervalNameParts{1}; % Extract the interval name
+
+if length(intervalNameParts) > 2
+    direction = intervalNameParts{2}; % Extract the direction (Up or Down)
+    directionFull = [upper(direction(1)), direction(2:end)]; % Capitalize the direction
+    clean_column_name = [intervalName, ' ', directionFull]; % Combine interval and direction
+else
+    clean_column_name = intervalName; % For the unison case, just use the interval name
+end
+
+% Adjust for the case where the interval is "Unison"
+if strcmp(intervalName, 'Unison')
+    clean_column_name = 'Unison';
+end
 
 % Plot the results
 figure;
@@ -110,6 +124,7 @@ title(['Selected Audiovisual Interval (' clean_column_name ') and IMD Components
 yyaxis left
 plot(sampleTimes, interpolatedFreqs, 'b', 'DisplayName', clean_column_name)
 hold on
+plot(sampleTimes, interpolatedCorrFreqs, 'c--', 'DisplayName', 'Music Frequency')
 plot(sampleTimes, differenceTones, 'g--', 'DisplayName', 'Difference Tone')
 plot(sampleTimes, summationTones, 'm--', 'DisplayName', 'Summation Tone')
 ylabel("Frequency (Hz)")
