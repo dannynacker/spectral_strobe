@@ -1,5 +1,9 @@
 function success = SCCS_strobe_load_device(preparedStrobeData1D,comPort,filename)
 
+% Designate the paths to your onset signal and music files 
+audioFilePathStart = "D:\Strobe_Spectra\copper_bell_A.mp3";
+audioFilePathMain = "D:\Strobe_Spectra\jupiter.mp3";
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % This function converts a sampled strobe sequence (as returned by sample_strobe.m)
@@ -69,7 +73,19 @@ disp("Re-reading file list.")
 fileListAfterWrite = device.getFileList(); % not sure what this does; fileListAfterWrite doesn't seem to be used again
 pause(1);
 
+% Play the start signal
+
+% Load and play the audio signal to signal the start of the sequence
+[yStart, FsStart] = audioread(audioFilePathStart);
+sound(yStart, FsStart);
+pause(5);
+
 disp("Playing strobe file...")
+
+% Play the audio file
+[yMain, FsMain] = audioread(audioFilePathMain);
+sound(yMain, FsMain);
+
 disp(device.playStrobeFile(filename, (length(preparedStrobeData1D)/12000) + 5)); % Play the newly written file and wait N+5 seconds for it to confirm that it has finished.
 pause(1)
 

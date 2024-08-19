@@ -79,7 +79,6 @@ disp(['Song length: ', num2str(song_length), ' seconds']);
 frameDurationS = (1/2000); % Time duration of each frame
 sampleTimes = (0:frameDurationS:song_length-frameDurationS)'; % Generate a list of sample timestamps
 
-
 % Interpolate the data based on sample times
 frequencyInterpMethod = 'nearest'; 
 brightnessInterpMethod = 'linear';
@@ -90,8 +89,28 @@ interpolatedBrightness = round(interp1(time, brightness, sampleTimes, brightness
 
 % Generate strobe waveform
 avgFreqSinceStart = cumsum(interpolatedFreqs) ./ (1:length(interpolatedFreqs))';
-strobeDutyCycle = 50;
+
+% Step 4: Generate strobe waveform
+strobeDutyCycle = 50; % 50% duty cycle
 strobe = (1 + square(sampleTimes * 2 * pi .* avgFreqSinceStart, strobeDutyCycle)) ./ 2;
+
+% Step 5: Create LED ON bitmap
+ledONBitmap = binary8ToUint8(repmat(strobe, 1, 8)); % 8-bit bitmap
+
+% Step 6: Interpolate central and ring brightness
+centralBrightness = round(interp1(sampleTimes, interpolatedBrightness, sampleTimes, brightnessInterpMethod));
+ringBrightness = round(interp1(sampleTimes, interpolatedBrightness, sampleTimes, brightnessInterpMethod));
+
+% Step 7: Preallocate DAC channel values
+dacChannelValuesPerSample = zeros(length(sampleTimes), 5);
+dacChannelValuesPerSample(:, 1) = centralBrightness;
+dacChannelValuesPerSample(:, 2:5) = repmat(ringBrightness, 1, 4);
+
+% Step 8: Generate 2D and 1D arrays
+preparedStrobeData2D = [ledONBitmap, dacChannelValuesPerSample];
+preparedStrobeData1D = reshape(preparedStrobeData2D', [size(preparedStrobeData2D, 1) * size(preparedStrobeData2D, 2), 1])';
+
+% preparedStrobeData1D now contains the final 1D array.
 
 % Calculate intermodulation distortion components
 differenceTones = abs(interpolatedFreqs - interpolatedCorrFreqs);
@@ -149,14 +168,7 @@ xlabel("Time (seconds)")
 xlim([0, song_length])
 legend('Location', 'best')
 
-% Load and play the audio signal to signal the start of the sequence
-[yStart, FsStart] = audioread(audioFilePathStart);
-
 pause(1);
-
-% Play the start signal
-sound(yStart, FsStart);
-pause(5);
 
 % Specify COM port and filename
 comPort = 'COM6'; % Replace with your actual COM port
@@ -167,9 +179,6 @@ success = SCCS_strobe_load_device(preparedStrobeData1D, comPort, filename);
 
 if success
     % Play the main audio file
-    [yMain, FsMain] = audioread(audioFilePathMain);
-    sound(yMain, FsMain);
-
     disp('Strobe data successfully loaded and played on the device.');
 else
     disp('Failed to load strobe data to the device.');
