@@ -13,6 +13,10 @@
 %  alongside the square waveform output of the light. Once the file has been read 
 %  by the light, a bell tone will play to signal to the participant to shut their 
 %  eyes, relax, and enjoy the show!
+%  This script differs from strobe_spectra_intervals because now the
+%  DUTY CYCLE of the stroboscope varies as a function of amplitude, 
+%  creating a further modulation of subjective intensity that anecdotal reports
+%  show a greater preference for compared to that of a constant 50% duty cycle
 % ------------------------------------------------------------------------------ 
 
 % Designate the paths to your onset signal and music files 
