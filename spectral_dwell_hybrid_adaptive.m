@@ -1,3 +1,19 @@
+% user input prompts a "dwell time" per participant stimulation preference (how long would you like to be entrained at each frequency?) 
+% this dwell time is then used in calculating which frequency to select from our FFT results of the audio file in a weighted
+% "adaptive frequency selection as a function of user-specified dwell time and transposition interval"
+% the adaptive threshold is calculated by a mix between: 
+% rolling standard deviation capturing signal variability (as a function of a window size of 5% of the total song length)
+% this ensures longer songs have a larger smoothing window while shorter songs have more rapid adaptations to changes 
+% mean absolute frequency changes are also considered in assessing signal variance 
+% so that stable periods contain finer frequency tuning and unstable periods are smoothed, preventing frenetic jumps 
+% when the signal is more stable, an amplitude-weighted mean is used to determine the stimulation frequency 
+% modal frequency is considered, but may be misleading if low-amplitude noise dominates, so when the modal and weighted frequency differ too much, the frequency with the greatest amplitude is chosen;
+% we never use modal frequency as the stimulation frequency -- rather, it serves as a comparison metric so that the system is able to decide whether the weighted frequency is stable per our threshold, or if it should default to the maximum frequency 
+% if the weighted average and mode are close, the weighted average is used, ensuring a smoother response 
+% if they differ beyond the adaptive threshold, the maximum frequency is chosen -- if high-frequency noise exists, rolling SD increases, making the adaptive threshold more restrictive 
+% further, if mean absolute change fluctuates too wildly, the threshold is also increased, creating a preference for weighted frequencies 
+% altogether, these live adaptations secure smooth transitions, avoid random fluctuations from noise or artifacts, and keeps entrainment a priority by maintaining the strength and stability of stimulation frequency 
+
 %% Load Data
 % Designate paths for audio files and spectral CSV
 %audioFilePathStart = "D:\Strobe_Spectra\copper_bell_A.mp3";
