@@ -26,6 +26,9 @@ audioFilePathMain = "D:\Strobe_Spectra\jupiter.mp3";
 % Designate the path to your spectral CSV file
 data = readtable("D:\Strobe_Spectra\luca\luther.csv");
 
+%% User Input: Song Name
+song_name = input('What song are you playing? ', 's');
+
 %% User Input: Interval Selection
 direction_choice = input('Choose interval direction: (1) Up, (2) Down: ');
 intervals = {'Unison', 'Minor Second', 'Major Second', 'Minor Third', 'Major Third', 'Perfect Fourth', 'Tritone', 'Perfect Fifth', 'Minor Sixth', 'Major Sixth', 'Minor Seventh', 'Major Seventh', 'Octave'};
